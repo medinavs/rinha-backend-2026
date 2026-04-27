@@ -1,0 +1,7 @@
+{
+  "participants": ["medinavs"],
+  "social": ["https://github.com/medinavs"],
+  "source-code-repo": "https://github.com/medinavs/rinha-backend-2026",
+  "stack": ["go", "nginx"],
+  "open_to_work": false
+}
