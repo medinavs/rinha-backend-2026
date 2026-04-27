@@ -2,11 +2,11 @@ package http
 
 import (
 	"encoding/json"
-	"net/http"
 	"time"
 
 	"github.com/medinavs/rinha-backend-2026/internal/application"
 	"github.com/medinavs/rinha-backend-2026/internal/domain"
+	"github.com/valyala/fasthttp"
 )
 
 type Handler struct {
@@ -56,16 +56,16 @@ type fraudScoreResponse struct {
 	FraudScore float64 `json:"fraud_score"`
 }
 
-func (h *Handler) HandleFraudScore(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleFraudScore(ctx *fasthttp.RequestCtx) {
 	var req fraudScoreRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid body", http.StatusBadRequest)
+	if err := json.Unmarshal(ctx.PostBody(), &req); err != nil {
+		ctx.Error("invalid body", fasthttp.StatusBadRequest)
 		return
 	}
 
 	requestedAt, err := time.Parse(time.RFC3339, req.Transaction.RequestedAt)
 	if err != nil {
-		http.Error(w, "invalid requested_at", http.StatusBadRequest)
+		ctx.Error("invalid requested_at", fasthttp.StatusBadRequest)
 		return
 	}
 
@@ -101,18 +101,24 @@ func (h *Handler) HandleFraudScore(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	score, err := h.FraudSvc.Detect(r.Context(), tx)
+	score, err := h.FraudSvc.Detect(ctx, tx)
 	if err != nil {
-		http.Error(w, "detection failed", http.StatusInternalServerError)
+		ctx.Error("detection failed", fasthttp.StatusInternalServerError)
 		return
 	}
 
 	resp := fraudScoreResponse{Approved: score.Approved, FraudScore: score.Score}
-	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(resp)
+	body, err := json.Marshal(resp)
+	if err != nil {
+		ctx.Error("encode failed", fasthttp.StatusInternalServerError)
+		return
+	}
+	ctx.SetContentType("application/json")
+	ctx.SetStatusCode(fasthttp.StatusOK)
+	ctx.SetBody(body)
 }
 
-func (h *Handler) HandleReady(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write([]byte("ok"))
+func (h *Handler) HandleReady(ctx *fasthttp.RequestCtx) {
+	ctx.SetStatusCode(fasthttp.StatusOK)
+	ctx.SetBodyString("ok")
 }
