@@ -1,6 +1,6 @@
 package domain
 
 type VectorIndex interface {
-	Search(query Vector, k int) []Neighbor
+	SearchTopK(query Vector, k int) (fraudVotes, considered int)
 	Size() int
 }

@@ -2,6 +2,7 @@ package http
 
 import (
 	"log"
+	"time"
 
 	"github.com/medinavs/rinha-backend-2026/internal/adapters/vectorindex"
 	"github.com/medinavs/rinha-backend-2026/internal/adapters/vectorizer"
@@ -17,12 +18,13 @@ func StartServer(cfg config.Config) {
 	}
 
 	log.Printf("loading references from %s ...", cfg.ReferencesPath)
-	refs, err := vectorindex.LoadReferences(cfg.ReferencesPath)
+	t0 := time.Now()
+	data, labels, count, err := vectorindex.Load(cfg.ReferencesPath)
 	if err != nil {
 		log.Fatalf("load references: %v", err)
 	}
-	log.Printf("loaded %d reference vectors", len(refs))
-	index := vectorindex.NewBruteForceIndex(refs)
+	log.Printf("loaded %d reference vectors in %s", count, time.Since(t0))
+	index := vectorindex.NewBruteForceIndex(data, labels, count)
 
 	fraudSvc := application.NewFraudDetectionService(vec, index)
 	handler := &Handler{FraudSvc: fraudSvc}
@@ -30,7 +32,6 @@ func StartServer(cfg config.Config) {
 	requestHandler := func(ctx *fasthttp.RequestCtx) {
 		path := ctx.Path()
 		method := ctx.Method()
-
 		switch {
 		case len(method) == 4 && string(method) == "POST" && string(path) == "/fraud-score":
 			handler.HandleFraudScore(ctx)

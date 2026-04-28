@@ -1,8 +1,6 @@
 package application
 
 import (
-	"context"
-
 	"github.com/medinavs/rinha-backend-2026/internal/domain"
 )
 
@@ -14,27 +12,10 @@ type FraudDetectionService struct {
 }
 
 func NewFraudDetectionService(v domain.Vectorizer, idx domain.VectorIndex) *FraudDetectionService {
-	return &FraudDetectionService{
-		Vectorizer: v,
-		Index:      idx,
-	}
+	return &FraudDetectionService{Vectorizer: v, Index: idx}
 }
 
-func (s *FraudDetectionService) Detect(ctx context.Context, tx domain.Transaction) (domain.FraudScore, error) {
+func (s *FraudDetectionService) Detect(tx domain.Transaction) (frauds, considered int) {
 	vec := s.Vectorizer.Vectorize(tx)
-	neighbors := s.Index.Search(vec, K)
-
-	frauds := 0
-	for _, n := range neighbors {
-		if n.Fraud {
-			frauds++
-		}
-	}
-
-	var score float64
-	if len(neighbors) > 0 {
-		score = float64(frauds) / float64(len(neighbors))
-	}
-
-	return domain.NewFraudScore(tx.ID, score), nil
+	return s.Index.SearchTopK(vec, K)
 }

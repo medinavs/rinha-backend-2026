@@ -11,12 +11,12 @@ type Transaction struct {
 	Merchant        Merchant
 	Terminal        Terminal
 	LastTransaction *LastTransaction
+	MerchantKnown   bool
 }
 
 type Customer struct {
-	AvgAmount      float64
-	TxCount24h     int
-	KnownMerchants []string
+	AvgAmount  float64
+	TxCount24h int
 }
 
 type Merchant struct {
@@ -26,9 +26,9 @@ type Merchant struct {
 }
 
 type Terminal struct {
-	IsOnline     bool
-	CardPresent  bool
-	KmFromHome   float64
+	IsOnline    bool
+	CardPresent bool
+	KmFromHome  float64
 }
 
 type LastTransaction struct {
