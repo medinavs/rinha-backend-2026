@@ -40,7 +40,7 @@ services:
           cpus: "0.45"
           memory: "150MB"
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8080/ready"]
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/ready"]
       interval: 1s
       timeout: 1s
       retries: 30
@@ -65,7 +65,7 @@ services:
           cpus: "0.45"
           memory: "150MB"
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8080/ready"]
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/ready"]
       interval: 1s
       timeout: 1s
       retries: 30
