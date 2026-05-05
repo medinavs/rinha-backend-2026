@@ -10,8 +10,8 @@ services:
     networks:
       - backend
     depends_on:
-      -backend-1
-      -backend-2
+      - backend-1
+      - backend-2
     deploy:
       resources:
         limits:
