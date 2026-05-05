@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/medinavs/rinha-backend-2026/internal/adapters/referenceio"
+	"github.com/medinavs/rinha-backend-2026/internal/adapters/reference"
 )
 
 func main() {
@@ -18,12 +18,12 @@ func main() {
 		log.Fatalf("create output dir: %v", err)
 	}
 
-	vectors, labels, count, err := referenceio.LoadJSONGZ(*in)
+	vectors, labels, count, err := reference.LoadJSONGZ(*in)
 	if err != nil {
 		log.Fatalf("load json.gz: %v", err)
 	}
 
-	if err := referenceio.WriteBinary(*out, vectors, labels, count); err != nil {
+	if err := reference.WriteBinary(*out, vectors, labels, count); err != nil {
 		log.Fatalf("write binary: %v", err)
 	}
 

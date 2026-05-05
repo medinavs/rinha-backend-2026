@@ -4,12 +4,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/medinavs/rinha-backend-2026/internal/adapters/referenceio"
+	"github.com/medinavs/rinha-backend-2026/internal/adapters/reference"
 )
 
 func Load(path string) ([]float32, []byte, int, error) {
 	if strings.HasSuffix(strings.ToLower(filepath.Ext(path)), "bin") {
-		return referenceio.LoadBinary(path)
+		return reference.LoadBinary(path)
 	}
-	return referenceio.LoadJSONGZ(path)
+	return reference.LoadJSONGZ(path)
 }

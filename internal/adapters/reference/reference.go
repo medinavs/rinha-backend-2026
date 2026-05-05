@@ -1,4 +1,4 @@
-package referenceio
+package reference
 
 import (
 	"compress/gzip"
