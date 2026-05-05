@@ -10,8 +10,10 @@ services:
     networks:
       - backend
     depends_on:
-      - backend-1
-      - backend-2
+      backend-1:
+        condition: service_healthy
+      backend-2:
+        condition: service_healthy
     deploy:
       resources:
         limits:
@@ -37,6 +39,11 @@ services:
         limits:
           cpus: "0.45"
           memory: "150MB"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/ready"]
+      interval: 1s
+      timeout: 1s
+      retries: 30
 
   backend-2:
     image: medinavs/rinha-backend-2026:latest
@@ -57,6 +64,11 @@ services:
         limits:
           cpus: "0.45"
           memory: "150MB"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/ready"]
+      interval: 1s
+      timeout: 1s
+      retries: 30
 
 networks:
   backend:
