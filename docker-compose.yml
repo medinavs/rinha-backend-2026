@@ -3,6 +3,7 @@ services:
     image: nginx:1.27-alpine
     container_name: nginx-lb
     hostname: nginx-lb
+    command: [ "nginx", "-g", "daemon off;", "-c", "/etc/nginx/nginx.conf" ]
     ports:
       - "9999:9999"
     volumes:
@@ -10,63 +11,87 @@ services:
     networks:
       - backend
     depends_on:
-      - backend-1
-      - backend-2
+      backend-1:
+        condition: service_healthy
+      backend-2:
+        condition: service_healthy
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
     deploy:
       resources:
         limits:
           cpus: "0.20"
-          memory: "50MB"
+          memory: "30MB"
 
   backend-1:
-    image: medinavs/rinha-backend-2026:v2
+    image: medinavs/rinha-backend-2026:v3
     container_name: backend-1
     hostname: backend-1
     expose:
       - "8080"
     environment:
       - LISTEN_ADDR=:8080
-      - REFERENCES_PATH=/app/resources/references.bin
+      - INDEX_PATH=/app/resources/index.ivf8192.bin
       - NORMALIZATION_PATH=/app/resources/normalization.json
       - MCC_RISK_PATH=/app/resources/mcc_risk.json
+      - ANN_NPROBE=8
+      - ANN_AMBIGUOUS_NPROBE=24
+      - ANN_REPAIR=true
       - GOMAXPROCS=1
+      - GOMEMLIMIT=120MiB
     networks:
       - backend
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+    healthcheck:
+      test: [ "CMD", "/usr/local/bin/rinha-healthcheck" ]
+      interval: 5s
+      timeout: 1s
+      retries: 30
+      start_period: 1s
     deploy:
       resources:
         limits:
           cpus: "0.40"
-          memory: "150MB"
-    # healthcheck:
-    #   test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/ready"]
-    #   interval: 1s
-    #   timeout: 1s
-    #   retries: 30
+          memory: "160MB"
 
   backend-2:
-    image: medinavs/rinha-backend-2026:v2
+    image: medinavs/rinha-backend-2026:v3
     container_name: backend-2
     hostname: backend-2
     expose:
       - "8080"
     environment:
       - LISTEN_ADDR=:8080
-      - REFERENCES_PATH=/app/resources/references.bin
+      - INDEX_PATH=/app/resources/index.ivf8192.bin
       - NORMALIZATION_PATH=/app/resources/normalization.json
       - MCC_RISK_PATH=/app/resources/mcc_risk.json
+      - ANN_NPROBE=8
+      - ANN_AMBIGUOUS_NPROBE=24
+      - ANN_REPAIR=true
       - GOMAXPROCS=1
+      - GOMEMLIMIT=120MiB
     networks:
       - backend
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+    healthcheck:
+      test: [ "CMD", "/usr/local/bin/rinha-healthcheck" ]
+      interval: 5s
+      timeout: 1s
+      retries: 30
+      start_period: 1s
     deploy:
       resources:
         limits:
           cpus: "0.40"
-          memory: "150MB"
-    # healthcheck:
-    #   test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/ready"]
-    #   interval: 1s
-    #   timeout: 1s
-    #   retries: 30
+          memory: "160MB"
 
 networks:
   backend:
