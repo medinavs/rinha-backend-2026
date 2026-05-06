@@ -15,7 +15,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.10"
+          cpus: "0.20"
           memory: "50MB"
 
   backend-1:
@@ -35,7 +35,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.45"
+          cpus: "0.40"
           memory: "150MB"
     # healthcheck:
     #   test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/ready"]
@@ -60,7 +60,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.45"
+          cpus: "0.40"
           memory: "150MB"
     # healthcheck:
     #   test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/ready"]
