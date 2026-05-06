@@ -17,14 +17,15 @@ func StartServer(cfg config.Config) {
 		log.Fatalf("load vectorizer: %v", err)
 	}
 
-	log.Printf("loading references from %s ...", cfg.ReferencesPath)
+	log.Printf("loading IVF index from %s ...", cfg.IndexPath)
 	t0 := time.Now()
-	data, labels, count, err := vectorindex.Load(cfg.ReferencesPath)
+	index, err := vectorindex.LoadBinaryIndex(cfg.IndexPath)
 	if err != nil {
-		log.Fatalf("load references: %v", err)
+		log.Fatalf("load index: %v", err)
 	}
-	log.Printf("loaded %d reference vectors in %s", count, time.Since(t0))
-	index := vectorindex.NewBruteForceIndex(data, labels, count)
+	index.SetIVFSearch(cfg.ANNNProbe, cfg.ANNAmbiguousProbe, cfg.ANNRepair)
+	log.Printf("loaded %d vectors (clusters=%d nprobe=%d ambiguous=%d repair=%v) in %s",
+		index.Size(), index.IVF.Clusters, index.IVF.NProbe, index.IVF.AmbiguousNProbe, index.IVF.Repair, time.Since(t0))
 
 	fraudSvc := application.NewFraudDetectionService(vec, index)
 	handler := &Handler{FraudSvc: fraudSvc}
